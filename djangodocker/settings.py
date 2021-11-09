@@ -107,16 +107,19 @@ REST_FRAMEWORK = {
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'django-db',
-        'USER': 'django',
-        'PASSWORD': 'django',
-        'HOST': 'db',
-        'PORT': '3306',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'djangodb',
+#         'USER': 'django',
+#         'PASSWORD': 'django',
+#         'HOST': 'db',
+#         'PORT': '3306',
+#         'TEST': {
+#             'NAME': "test_djangodb",
+#         },
+#     }
+# }
 DATABASES = {
     'default': {
         'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.sqlite3'),
@@ -125,6 +128,9 @@ DATABASES = {
         'PASSWORD': os.environ.get('DATABASE_PASSWORD', 'password'),
         'HOST': os.environ.get('DATABASE_HOST', 'localhost'),
         'PORT': os.environ.get('DATABASE_PORT', '5432'),
+        'TEST': {
+            'NAME': "test_" + os.environ.get('DATABASE_DB', os.path.join(BASE_DIR, 'db.sqlite3')),
+        },
     }
 }
 
