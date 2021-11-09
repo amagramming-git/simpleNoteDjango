@@ -1,47 +1,65 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
-
-# Orbs are reusable packages of CircleCI configuration that you may share across projects, enabling you to create encapsulated, parameterized commands, jobs, and executors that can be used across multiple projects.
-# See: https://circleci.com/docs/2.0/orb-intro/
-orbs:
-  # The python orb contains a set of prepackaged CircleCI configuration you can use repeatedly in your configuration files
-  # Orb commands and jobs help you with common scripting around a language/tool
-  # so you dont have to copy and paste it everywhere.
-  # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
-  python: circleci/python@1.2
-
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  build-and-test: # This is the name of the job, feel free to change it to better match what you're trying to do!
-    # These next lines defines a Docker executors: https://circleci.com/docs/2.0/executor-types/
-    # You can specify an image from Dockerhub or use one of the convenience images from CircleCI's Developer Hub
-    # A list of available CircleCI Docker convenience images are available here: https://circleci.com/developer/images/image/cimg/python
-    # The executor is the environment in which the steps below will be executed - below will use a python 3.8 container
-    # Change the version below to your required version of python
+  build:
     docker:
-      - image: cimg/python:3.8
-    # Checkout the code as the first step. This is a dedicated CircleCI step.
-    # The python orb's install-packages step will install the dependencies from a Pipfile via Pipenv by default.
-    # Here we're making sure we use just use the system-wide pip. By default it uses the project root's requirements.txt.
-    # Then run your tests!
-    # CircleCI will report the results back to your VCS provider.
+      - image: cimg/base:stable
     steps:
       - checkout
-      - python/install-packages:
-          pkg-manager: pip
-          # app-dir: ~/project/package-directory/  # If you're requirements.txt isn't in the root directory.
-          # pip-dependency-file: test-requirements.txt  # if you have a different name for your requirements file, maybe one that combines your runtime and test requirements.
       - run:
-          name: Run tests
-          # This assumes pytest is installed via the install-package step above
-          command: python manage.py test # pytest
-
-# Invoke jobs via workflows
-# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
-workflows:
-  sample: # This is the name of the workflow, feel free to change it to better match your workflow.
-    # Inside the workflow, you define the jobs you want to run.
-    jobs:
-      - build-and-test
+          name: "Say hello"
+          command: "echo Hello, World!"
+# version: 2 # use CircleCI 2.0
+# jobs:
+#   build:
+#     working_directory: ~/circleci-demo-python-django
+#     docker:
+#       - image: circleci/python:3.9 # 各ジョブで Docker Executor のイメージを定義する必要があり、後続のジョブでは別のイメージを定義できます
+#         environment:
+#           SECRET_KEY: django-insecure-g@ww%@j*fj+*p8se@*e9iqs9nnci0&5s)9e5)3^2ajoc^47hvu
+#           DEBUG: 0
+#           DATABASE_ENGINE: django.db.backends.mysql
+#           DATABASE_DB: circle_test
+#           DATABASE_USER: root
+#           DATABASE_PASSWORD: root
+#           DATABASE_HOST: localhost
+#           DATABASE_PORT: 3306
+#           CORS_ORIGIN_WHITELIST_ELEMENT: http://localhost:3000
+#           # PIPENV_VENV_IN_PROJECT: "true"
+#           # DATABASE_URL: postgresql://root@localhost/circle_test?sslmode=disable
+#       - image: circleci/mysql:5.7 # DockerHubにあるイメージのため、authする必要がある。
+#         auth:
+#           username: $DOCKERHUB_USERNAME
+#           password: $DOCKERHUB_PASSWORD # context / project UI env-var reference
+#         environment:
+#           MYSQL_ROOT_PASSWORD: root
+#           MYSQL_ROOT_HOST: "%"
+#           MYSQL_DATABASE: circle_test
+#     steps: # steps that comprise the `build` job
+#       - checkout # check out source code to working directory
+#       # - run: sudo chown -R circleci:circleci /usr/local/bin
+#       # - run: sudo chown -R circleci:circleci /usr/local/lib/python3.9/site-packages
+#       # - run:
+#       #     command: |
+#       #       pip install --upgrade
+#       #       sudo pip install pipenv
+#       #       pipenv install
+#       # - run:
+#       #     command: |
+#       #       pipenv run python manage.py test
+#       - run:
+#           # Our primary container isn't MYSQL so run a sleep command until it's ready.
+#           name: MySQL が準備できるまで待機
+#           command: |
+#             for i in `seq 1 10`;
+#             do
+#               nc -z 127.0.0.1 3306 && echo Success && exit 0
+#               echo -n .
+#               sleep 1
+#             done
+#             echo Failed waiting for MySQL && exit 1
+#       - run:
+#           name: MySQL CLI のインストール; ダミー データのインポート; サンプル クエリの実行
+#           command: |
+#             sudo apt-get install default-mysql-client
+#             mysql -h 127.0.0.1 -u root -proot circle_test < sql-data/dummy.sql
+#             mysql -h 127.0.0.1 -u root -proot -execute="SELECT * FROM test_db.Persons"
