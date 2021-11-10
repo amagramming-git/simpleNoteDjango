@@ -53,13 +53,15 @@ jobs:
           command: dockerize -wait tcp://localhost:3306 -timeout 1m
       # データベースのテーブルの作成などの初期化(データベースはコンテナ初期化時に作成される)
       - run:
-          name: initialize db
           command: |
-            python manage.py makemigrations
-            python manage.py migrate
-
-      # テストの実行
-      - run:
-          name: run tests
-          command: |
-            python manage.py test
+            pipenv run python manage.py test
+      # - run:
+      #     name: initialize db
+      #     command: |
+      #       python manage.py makemigrations
+      #       python manage.py migrate
+      # # テストの実行
+      # - run:
+      #     name: run tests
+      #     command: |
+      #       python manage.py test
