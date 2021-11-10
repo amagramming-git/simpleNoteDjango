@@ -55,7 +55,6 @@ jobs:
       - run:
           name: initialize db
           command: |
-            . venv/bin/activate
             python manage.py makemigrations
             python manage.py migrate
 
@@ -63,5 +62,4 @@ jobs:
       - run:
           name: run tests
           command: |
-            . venv/bin/activate
             python manage.py test
