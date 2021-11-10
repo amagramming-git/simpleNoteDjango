@@ -1,65 +1,54 @@
-# version: 2.1
-# jobs:
-#   build:
-#     docker:
-#       - image: cimg/base:stable
-#     steps:
-#       - checkout
-#       - run:
-#           name: "Say hello"
-#           command: "echo Hello, World!"
-version: 2 # use CircleCI 2.0
+# CircleCI 2.0 を利用する
+version: 2
 jobs:
   build:
-    working_directory: ~/circleci-demo-python-django
+    # Dockerコンテナを利用する
     docker:
-      # - image: circleci/python:3.9 # 各ジョブで Docker Executor のイメージを定義する必要があり、後続のジョブでは別のイメージを定義できます
-      #   environment:
-      #     SECRET_KEY: django-insecure-g@ww%@j*fj+*p8se@*e9iqs9nnci0&5s)9e5)3^2ajoc^47hvu
-      #     DEBUG: 0
-      #     DATABASE_ENGINE: django.db.backends.mysql
-      #     DATABASE_DB: circle_test
-      #     DATABASE_USER: root
-      #     DATABASE_PASSWORD: root
-      #     DATABASE_HOST: localhost
-      #     DATABASE_PORT: 3306
-      #     CORS_ORIGIN_WHITELIST_ELEMENT: http://localhost:3000
-      #     # PIPENV_VENV_IN_PROJECT: "true"
-      #     # DATABASE_URL: postgresql://root@localhost/circle_test?sslmode=disable
-      - image: circleci/mysql:5.7 # DockerHubにあるイメージのため、authする必要がある。
-        auth:
-          username: $DOCKERHUB_USERNAME
-          password: $DOCKERHUB_PASSWORD # context / project UI env-var reference
+      # 後続に記載するstepsを実行するメインとなるDockerコンテナを指定する
+      - image: circleci/python:3.9
+      # 上記のメインとなるDockerコンテナが依存するDockerコンテナを指定する(Databaseなど)
+      - image: circleci/mysql:5.7
+        command: |
+          mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
         environment:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_ROOT_HOST: "%"
           MYSQL_DATABASE: circle_test
-    steps: # steps that comprise the `build` job
-      - checkout # check out source code to working directory
-      # - run: sudo chown -R circleci:circleci /usr/local/bin
-      # - run: sudo chown -R circleci:circleci /usr/local/lib/python3.9/site-packages
-      # - run:
-      #     command: |
-      #       pip install --upgrade
-      #       sudo pip install pipenv
-      #       pipenv install
-      # - run:
-      #     command: |
-      #       pipenv run python manage.py test
+          MYSQL_USER: root
+          MYSQL_ROOT_HOST: "%"
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+
+    working_directory: ~/repo
+
+    steps:
+      # リポジトリのコードを working_directory にチェックアウト
+      - checkout
+
+      # dockerizeのインストール
       - run:
-          # Our primary container isn't MYSQL so run a sleep command until it's ready.
-          name: MySQL が準備できるまで待機
+          name: install dockerize
           command: |
-            for i in `seq 1 200`;
-            do
-              nc -z 127.0.0.1 3306 && echo Success && exit 0
-              echo -n .
-              sleep 1
-            done
-            echo Failed waiting for MySQL && exit 1
+            [ ! -f /usr/local/bin/dockerize ] && wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+            true
+          environment:
+            DOCKERIZE_VERSION: v0.5.0
+
+      # mysqlコンテナの起動待機
       - run:
-          name: MySQL CLI のインストール; ダミー データのインポート; サンプル クエリの実行
-          command: |
-            sudo apt-get install default-mysql-client
-            mysql -h 127.0.0.1 -u root -proot circle_test < sql-data/dummy.sql
-            mysql -h 127.0.0.1 -u root -proot -execute="SELECT * FROM test_db.Persons"
+          name: Wait for db
+          command: dockerize -wait tcp://localhost:3306 -timeout 1m
+      - run:
+          name: echo
+          command: echo "hello world"
+      # # データベースのテーブルの作成などの初期化(データベースはコンテナ初期化時に作成される)
+      # - run:
+      #     name: initialize db
+      #     command: |
+      #       . venv/bin/activate
+      #       python manage.py makemigrations --settings mysite.settings.ci
+      #       python manage.py migrate        --settings mysite.settings.ci
+
+      # # テストの実行
+      # - run:
+      #     name: run tests
+      #     command: |
+      #       . venv/bin/activate
+      #       python manage.py test --settings mysite.settings.ci
