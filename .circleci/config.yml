@@ -6,6 +6,16 @@ jobs:
     docker:
       # 後続に記載するstepsを実行するメインとなるDockerコンテナを指定する
       - image: circleci/python:3.9
+        environment:
+          SECRET_KEY: "django-insecure-g@ww%@j*fj+*p8se@*e9iqs9nnci0&5s)9e5)3^2ajoc^47hvu"
+          DEBUG: 0
+          DATABASE_ENGINE: "django.db.backends.mysql"
+          DATABASE_DB: circle_test
+          DATABASE_USER: root
+          DATABASE_PASSWORD: root
+          DATABASE_HOST: localhost
+          DATABASE_PORT: 3306
+          CORS_ORIGIN_WHITELIST_ELEMENT: http://localhost:3000
       # 上記のメインとなるDockerコンテナが依存するDockerコンテナを指定する(Databaseなど)
       - image: circleci/mysql:5.7
         command: |
@@ -13,14 +23,22 @@ jobs:
         environment:
           MYSQL_DATABASE: circle_test
           MYSQL_ROOT_HOST: "%"
-          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_ROOT_PASSWORD: root
 
     working_directory: ~/repo
 
     steps:
       # リポジトリのコードを working_directory にチェックアウト
-      - checkout
-
+      - checkout # check out source code to working directory
+      - run: sudo chown -R circleci:circleci /usr/local/bin
+      - run: sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
+      - restore_cache:
+          # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+      - run:
+          command: |
+            sudo pip install pipenv
+            pipenv install
       # dockerizeのインストール
       - run:
           name: install dockerize
@@ -29,25 +47,21 @@ jobs:
             true
           environment:
             DOCKERIZE_VERSION: v0.5.0
-
       # mysqlコンテナの起動待機
       - run:
           name: Wait for db
           command: dockerize -wait tcp://localhost:3306 -timeout 1m
+      # データベースのテーブルの作成などの初期化(データベースはコンテナ初期化時に作成される)
       - run:
-          name: echo
-          command: echo "hello world"
-      # # データベースのテーブルの作成などの初期化(データベースはコンテナ初期化時に作成される)
-      # - run:
-      #     name: initialize db
-      #     command: |
-      #       . venv/bin/activate
-      #       python manage.py makemigrations --settings mysite.settings.ci
-      #       python manage.py migrate        --settings mysite.settings.ci
+          name: initialize db
+          command: |
+            . venv/bin/activate
+            python manage.py makemigrations
+            python manage.py migrate
 
-      # # テストの実行
-      # - run:
-      #     name: run tests
-      #     command: |
-      #       . venv/bin/activate
-      #       python manage.py test --settings mysite.settings.ci
+      # テストの実行
+      - run:
+          name: run tests
+          command: |
+            . venv/bin/activate
+            python manage.py test
