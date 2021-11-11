@@ -15,7 +15,7 @@ jobs:
           DATABASE_DB: circle_test
           DATABASE_USER: root
           DATABASE_PASSWORD: root
-          DATABASE_HOST: localhost
+          DATABASE_HOST: "127.0.0.1"
           DATABASE_PORT: 3306
           CORS_ORIGIN_WHITELIST_ELEMENT: http://localhost:3000
       # 上記のメインとなるDockerコンテナが依存するDockerコンテナを指定する(Databaseなど)
@@ -60,11 +60,8 @@ jobs:
             echo $PYTHONPATH
       # データベースのテーブルの作成などの初期化(データベースはコンテナ初期化時に作成される)
       - run:
-          name: Install MySQL CLI; Import dummy data; run an example query
           command: |
-            sudo apt-get install default-mysql-client
-            mysql -h 127.0.0.1 -u root -proot circle_test < sql-data/dummy.sql
-            mysql -h 127.0.0.1 -u root -proot --execute="SELECT * FROM circle_test.Persons"
+            nc -z 127.0.0.1 3306
       - run:
           name: initialize db
           command: |
