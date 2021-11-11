@@ -69,7 +69,7 @@ jobs:
             python manage.py migrate
       - run:
           command: |
-            pipenv run python manage.py test
+            python manage.py test
       # - run:
       #     name: initialize db
       #     command: |
