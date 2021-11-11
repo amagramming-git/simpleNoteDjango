@@ -56,14 +56,11 @@ jobs:
             pip show django
       - run:
           command: |
+            export PYTHONPATH="/usr/local/lib/python3.9/site-packages"
             echo $PYTHONPATH
       - run:
           command: |
-            python test.py
-      # データベースのテーブルの作成などの初期化(データベースはコンテナ初期化時に作成される)
-      # - run:
-      #     command: |
-      #       pipenv run python manage.py test
+            pipenv run python manage.py test
       # - run:
       #     name: initialize db
       #     command: |
