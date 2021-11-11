@@ -91,14 +91,14 @@ workflows:
             branches:
               only:
                 - main
-      - aws-eks/update-container-image:
-          cluster-name: eks-from-eksctl
-          container-image-updates: "django=${AWS_ECR_ACCOUNT_URL}/${AWS_ECR_REPO_NAME}:${CIRCLE_SHA1}"
-          record: true
-          resource-name: deployment.apps/django
-          requires:
-            - aws-ecr/build-and-push-image
-          filters:
-            branches:
-              only:
-                - main
+      # - aws-eks/update-container-image:
+      #     cluster-name: eks-from-eksctl
+      #     container-image-updates: "django=${AWS_ECR_ACCOUNT_URL}/${AWS_ECR_REPO_NAME}:${CIRCLE_SHA1}"
+      #     record: true
+      #     resource-name: deployment.apps/django
+      #     requires:
+      #       - aws-ecr/build-and-push-image
+      #     filters:
+      #       branches:
+      #         only:
+      #           - main
