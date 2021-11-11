@@ -60,6 +60,9 @@ jobs:
             echo $PYTHONPATH
       - run:
           command: |
+            python manage.py runserver 0.0.0.0:8000 --insecure
+      - run:
+          command: |
             pipenv run python manage.py test
       # - run:
       #     name: initialize db
