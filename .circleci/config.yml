@@ -51,17 +51,16 @@ jobs:
       - run:
           name: Wait for db
           command: dockerize -wait tcp://localhost:3306 -timeout 1m
-      - run:
-          command: |
-            pip show django
-      - run:
-          command: |
-            export PYTHONPATH="/usr/local/lib/python3.9/site-packages"
-            echo $PYTHONPATH
-      # データベースのテーブルの作成などの初期化(データベースはコンテナ初期化時に作成される)
-      - run:
-          command: |
-            nc -z 127.0.0.1 3306
+      # - run:
+      #     command: |
+      #       pip show django
+      # - run:
+      #     command: |
+      #       export PYTHONPATH="/usr/local/lib/python3.9/site-packages"
+      #       echo $PYTHONPATH
+      # - run:
+      #     command: |
+      #       nc -z 127.0.0.1 3306
       - run:
           name: initialize db
           command: |
@@ -70,13 +69,3 @@ jobs:
       - run:
           command: |
             python manage.py test
-      # - run:
-      #     name: initialize db
-      #     command: |
-      #       python manage.py makemigrations
-      #       python manage.py migrate
-      # # テストの実行
-      # - run:
-      #     name: run tests
-      #     command: |
-      #       python manage.py test
