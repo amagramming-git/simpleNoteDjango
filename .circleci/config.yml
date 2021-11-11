@@ -58,9 +58,12 @@ jobs:
           command: |
             export PYTHONPATH="/usr/local/lib/python3.9/site-packages"
             echo $PYTHONPATH
+      # データベースのテーブルの作成などの初期化(データベースはコンテナ初期化時に作成される)
       - run:
+          name: initialize db
           command: |
-            python manage.py runserver 0.0.0.0:8000 --insecure
+            python manage.py makemigrations
+            python manage.py migrate
       - run:
           command: |
             pipenv run python manage.py test
