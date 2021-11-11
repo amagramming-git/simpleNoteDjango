@@ -7,6 +7,8 @@ jobs:
       # 後続に記載するstepsを実行するメインとなるDockerコンテナを指定する
       - image: circleci/python:3.9
         environment:
+          PYTHONUNBUFFERED: 1
+          PYTHONDONTWRITEBYTECODE: 1
           SECRET_KEY: "django-insecure-g@ww%@j*fj+*p8se@*e9iqs9nnci0&5s)9e5)3^2ajoc^47hvu"
           DEBUG: 0
           DATABASE_ENGINE: "django.db.backends.mysql"
