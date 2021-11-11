@@ -60,6 +60,12 @@ jobs:
             echo $PYTHONPATH
       # データベースのテーブルの作成などの初期化(データベースはコンテナ初期化時に作成される)
       - run:
+          name: Install MySQL CLI; Import dummy data; run an example query
+          command: |
+            sudo apt-get install default-mysql-client
+            mysql -h 127.0.0.1 -u root -proot circle_test < sql-data/dummy.sql
+            mysql -h 127.0.0.1 -u root -proot --execute="SELECT * FROM circle_test.Persons"
+      - run:
           name: initialize db
           command: |
             python manage.py makemigrations
