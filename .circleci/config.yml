@@ -57,6 +57,9 @@ jobs:
       - run:
           command: |
             echo $PYTHONPATH
+      - run:
+          command: |
+            python test.py
       # データベースのテーブルの作成などの初期化(データベースはコンテナ初期化時に作成される)
       # - run:
       #     command: |
