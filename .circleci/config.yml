@@ -51,10 +51,16 @@ jobs:
       - run:
           name: Wait for db
           command: dockerize -wait tcp://localhost:3306 -timeout 1m
-      # データベースのテーブルの作成などの初期化(データベースはコンテナ初期化時に作成される)
       - run:
           command: |
-            pipenv run python manage.py test
+            pip show django
+      - run:
+          command: |
+            echo $PYTHONPATH
+      # データベースのテーブルの作成などの初期化(データベースはコンテナ初期化時に作成される)
+      # - run:
+      #     command: |
+      #       pipenv run python manage.py test
       # - run:
       #     name: initialize db
       #     command: |
