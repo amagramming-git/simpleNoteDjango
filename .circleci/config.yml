@@ -1,5 +1,10 @@
 # CircleCI 2.1 を利用する
 version: 2.1
+orbs:
+  aws-ecr: circleci/aws-ecr@7.2.0
+  aws-eks: circleci/aws-eks@1.1.0
+  kubernetes: circleci/kubernetes@0.12.0
+
 jobs:
   build-and-test:
     docker:
