@@ -1,5 +1,6 @@
-# CircleCI 2.0 を利用する
-version: 2
+# CircleCI 2.1 を利用する
+version: 2.1
+
 jobs:
   build-and-test:
     # Dockerコンテナを利用する
