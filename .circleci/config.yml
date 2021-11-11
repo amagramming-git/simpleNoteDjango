@@ -1,7 +1,7 @@
 # CircleCI 2.0 を利用する
 version: 2
 jobs:
-  build:
+  build-and-test:
     # Dockerコンテナを利用する
     docker:
       # 後続に記載するstepsを実行するメインとなるDockerコンテナを指定する
@@ -26,9 +26,7 @@ jobs:
           MYSQL_DATABASE: circle_test
           MYSQL_ROOT_HOST: "%"
           MYSQL_ROOT_PASSWORD: root
-
     working_directory: ~/django
-
     steps:
       # リポジトリのコードを working_directory にチェックアウト
       - checkout # check out source code to working directory
@@ -51,6 +49,7 @@ jobs:
       - run:
           name: Wait for db
           command: dockerize -wait tcp://localhost:3306 -timeout 1m
+      # デバックしてた頃のcommand
       # - run:
       #     command: |
       #       pip show django
@@ -69,3 +68,33 @@ jobs:
       - run:
           command: |
             python manage.py test
+
+workflows:
+  sample:
+    jobs:
+      - build-and-test
+      # - aws-ecr/build-and-push-image:
+      #     requires:
+      #       - build-and-test
+      #     account-url: AWS_ECR_ACCOUNT_URL # 965398552090.dkr.ecr.ap-northeast-1.amazonaws.com
+      #     region: AWS_DEFAULT_REGION # ap-northeast-1
+      #     aws-access-key-id: AWS_ACCESS_KEY_ID
+      #     aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+      #     path: .
+      #     repo: "${AWS_ECR_REPO_NAME}" # simple-note-django
+      #     tag: "${CIRCLE_SHA1}"
+      #     filters:
+      #       branches:
+      #         only:
+      #           - main
+      # - aws-eks/update-container-image:
+      #     cluster-name: eks-from-eksctl
+      #     container-image-updates: "django=${AWS_ECR_ACCOUNT_URL}/${AWS_ECR_REPO_NAME}:${CIRCLE_SHA1}"
+      #     record: true
+      #     resource-name: deployment.apps/django
+      #     requires:
+      #       - aws-ecr/build-and-push-image
+      #     filters:
+      #       branches:
+      #         only:
+      #           - main
